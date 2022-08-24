@@ -2,6 +2,13 @@
 name = "headtail"
 version = "0.1.0"
 edition = "2021"
+description = "head and tail simultaneously"
+homepage = "https://github.com/CleanCut/headtail"
+repository = "https://github.com/CleanCut/headtail"
+readme = "README.md"
+keywords = [ "head", "tail", "trim", "stdout", "file" ]
+categories = [ "command-line-utilities" ]
+license = "MIT OR Apache-2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
