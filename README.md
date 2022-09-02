@@ -21,7 +21,7 @@ $ headtail somebigfile.txt
 $ somecommand | headtail
 
 # Get the first 25 and last 5 lines of a file
-$ headtail somebigfile.txt -h 25 -t 5
+$ headtail somebigfile.txt -n 25 -t 5
 
 # Get the default amount of first lines, but only 3 last lines
 $ headtail somebigfile.txt -t 3
