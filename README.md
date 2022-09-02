@@ -7,6 +7,10 @@ TODO:
 - [x] Write integration tests. Run them with `cargo test`
 - [x] Create cheat sheet so we don't get stuck when we do our collaboration session.
 - [ ] Sep 15th 2022, Day-of-Learning: Make the thing!
+  - [ ] Review the existing project, including the release scaffolding
+  - [ ] Run the (failing) tests
+  - [ ] Implement the utility
+  - [ ] Publish a release
 
 ## Quick Start
 
