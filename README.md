@@ -4,6 +4,8 @@
 
 TODO:
 - [x] Get a hello-world version published to crates.io to reserve the name
+- [x] Write integration tests. Run them with `cargo test`
+- [x] Create cheat sheet so we don't get stuck when we do our collaboration session.
 - [ ] Sep 15th 2022, Day-of-Learning: Make the thing!
 
 ## Quick Start
