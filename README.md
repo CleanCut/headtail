@@ -16,19 +16,19 @@ You need to [have Rust installed](https://www.rust-lang.org/tools/install).
 # Install headtail
 $ cargo install headtail
 
-# Use it on a file
+# Use it on a file - prints the first 10 and last 10 lines
 $ headtail somebigfile.txt
 
-# Pipe stdout to it
+# Pipe stdout to it - prints the first 10 and last 10 lines
 $ somecommand | headtail
 
-# Get the first 25 and last 5 lines of a file
+# Print the first 25 and last 5 lines of a file
 $ headtail somebigfile.txt -H 25 -T 5
 
-# Get the default amount of first lines, but only 3 last lines
+# Print the default amount of first lines, but only 3 last lines
 $ headtail somebigfile.txt -T 3
 
-# Do the default thing...but then keep tailing...
+# Do the default thing...but then keep tailing the file and print out anything new appended to it
 $ headtail somebigfile.txt -f
 ```
 
