@@ -3,8 +3,8 @@
 `head` and `tail` simultaneously
 
 TODO:
-- [x] (Soon) Get a hello-world version published to crates.io to reserve the name
-- [ ] (Maybe next Day-of-Learning?) Make the thing
+- [x] Get a hello-world version published to crates.io to reserve the name
+- [ ] Sep 15th 2022, Day-of-Learning: Make the thing!
 
 ## Quick Start
 
