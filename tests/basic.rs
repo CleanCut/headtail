@@ -1,9 +1,4 @@
-use std::process::{Command, Output};
-
-fn debug_output(output: &Output) {
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    println!("Output ({}): '{}'", output.status.to_string(), stdout);
-}
+use std::process::Command;
 
 #[test]
 fn help() {
