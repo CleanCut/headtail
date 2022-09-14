@@ -1,26 +1,15 @@
 use clap::{App, Arg};
 
 #[derive(Debug)]
-pub struct Args {
+pub struct Opts {
     pub filename: Option<String>,
     pub head: usize,
     pub tail: usize,
     pub follow: bool,
 }
 
-impl Default for Args {
-    fn default() -> Self {
-        Self {
-            filename: None,
-            head: 10,
-            tail: 10,
-            follow: false,
-        }
-    }
-}
-
-impl Args {
-    pub fn parse() -> Self {
+impl Opts {
+    pub fn parse_args() -> Self {
         let matches = App::new("headtail")
             .arg(Arg::with_name("filename").help("Read from a file instead of stdin"))
             .arg(
@@ -41,6 +30,7 @@ impl Args {
             .arg(
                 Arg::with_name("follow")
                 .short('f')
+                .long("--follow")
                 .help("Wait for additional data to be appended to a file. Ignored if standard input is a pipe.")
             ).get_matches();
         let filename = matches.value_of("filename").map(|f| f.to_string());
