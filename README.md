@@ -17,9 +17,14 @@ TODO:
 You need to [have Rust installed](https://www.rust-lang.org/tools/install).
 
 ```shell
-# Install headtail
+# Install latest *release* version of headtail
 $ cargo install headtail
 
+# Install local development version of headtail from inside the git repo
+$ cargo install --path .
+```
+
+```
 # Use it on a file - prints the first 10 and last 10 lines
 $ headtail somebigfile.txt
 
