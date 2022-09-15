@@ -2,6 +2,27 @@
 
 ## [Unreleased] - ReleaseDate
 
+### New!
+
+- Made the project! It supports some flags. Here's the help output:
+
+```
+headtail 
+
+USAGE:
+    headtail [OPTIONS] [FILENAME]
+
+ARGS:
+    <FILENAME>    Read from a file instead of stdin
+
+OPTIONS:
+    -f, --follow         Wait for additional data to be appended to a file. Ignored if standard
+                         input is a pipe.
+    -h, --help           Print help information
+    -H, --head <HEAD>    Number of first lines of a file to display [default: 10]
+    -T, --tail <TAIL>    Number of last lines of a file to display [default: 10]
+```
+
 ## [0.1.0] - 2022-08-24
 
 Placeholder release to reserve the name.
