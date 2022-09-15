@@ -3,6 +3,7 @@ pub mod opts;
 use std::{
     collections::VecDeque,
     io::{BufRead, ErrorKind, Result, Write},
+    time::Duration,
 };
 
 use opts::Opts;
@@ -58,7 +59,10 @@ pub fn headtail(opts: &Opts) -> Result<()> {
         loop {
             line.clear();
             match reader.read_line(&mut line) {
-                Ok(0) => {}
+                Ok(0) => {
+                    // This is a busy loop, so add a little sleep to make it less CPU hungry
+                    std::thread::sleep(Duration::from_millis(25));
+                }
                 Ok(_) => {
                     careful_write(&mut writer, &line)?;
                     let _ = writer.flush();
@@ -68,7 +72,6 @@ pub fn headtail(opts: &Opts) -> Result<()> {
                     return Err(e);
                 }
             }
-            // TODO: Is this a busy loop? Do we need to sleep or something?
         }
     }
 
