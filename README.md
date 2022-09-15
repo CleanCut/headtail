@@ -6,17 +6,18 @@ TODO:
 - [x] Get a hello-world version published to crates.io to reserve the name
 - [x] Write integration tests. Run them with `cargo test`
 - [x] Create cheat sheet so we don't get stuck when we do our collaboration session.
-- [ ] Sep 15th 2022, Day-of-Learning: Make the thing!
-  - [ ] Review the existing project, including the release scaffolding
-  - [ ] Run the (failing) tests
-  - [ ] Implement the utility, handling arguments for file name (optional, read from stdin otherwise), number of lines to head, number of lines to tail, and whether or not to follow (iff input is a file).
-  - [ ] Publish a release to crates.io
+- [x] Sep 15th 2022, Day-of-Learning: Make the thing!
+  - [x] Review the existing project, including the release scaffolding
+  - [x] Run the (failing) tests
+  - [x] Implement the utility, handling arguments for file name (optional, read from stdin otherwise), number of lines to head, number of lines to tail, and whether or not to follow (iff input is a file).
+  - [x] Publish a release to crates.io
 - [ ] Parallel tasks folks could pick up for fun:
-  - [ ] Set up GitHub Actions CI ([example from my rusty_engine project](https://github.com/CleanCut/rusty_engine/blob/main/.github/workflows/ci.yml))
+  - [x] Set up GitHub Actions CI ([example from my rusty_engine project](https://github.com/CleanCut/rusty_engine/blob/main/.github/workflows/ci.yml))
   - [ ] Set up CodeQL
   - [ ] Set up Dependabot
   - [ ] Improve Readme
-  - [ ] More integration tests
+  - [x] More integration tests
+  - [ ] Unit tests
   - [ ] Benchmark tests (see [criterion](https://bheisler.github.io/criterion.rs/book/index.html))
 - [ ] After initial implementation
   - [ ] Any `TODO`s
