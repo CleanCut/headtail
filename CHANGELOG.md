@@ -1,6 +1,19 @@
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- CI builds are now available on pull requests (including caching, rustfmt, and clippy)
+
+### Fixed
+
+- Don't crash when writing to a broken pipe
+- Reduce follow from a busy loop (100% CPU) to a user-configurable sleep interval that defaults to 25ms (0.2% CPU in local testing)
+
+### Other
+
+- Refactored where the input streams are created
+
 
 ## [0.2.0] - 2022-09-15
 
