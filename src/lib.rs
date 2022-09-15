@@ -2,10 +2,21 @@ pub mod opts;
 
 use std::{
     collections::VecDeque,
-    io::{BufRead, Result, Write},
+    io::{BufRead, ErrorKind, Result, Write},
 };
 
 use opts::Opts;
+
+fn careful_write(writer: &mut dyn Write, line: &str) -> Result<()> {
+    if let Err(e) = writer.write(line.as_bytes()) {
+        if e.kind() == ErrorKind::BrokenPipe {
+            return Ok(());
+        } else {
+            return Err(e);
+        }
+    }
+    Ok(())
+}
 
 pub fn headtail(opts: &Opts) -> Result<()> {
     let mut reader = opts.input_stream()?;
@@ -18,8 +29,8 @@ pub fn headtail(opts: &Opts) -> Result<()> {
         let mut line = String::new();
         match reader.read_line(&mut line) {
             Ok(0) => {
-                for line in &tail_buffer {
-                    let _ = writer.write(line.as_bytes())?;
+                for tail_line in &tail_buffer {
+                    careful_write(&mut writer, tail_line)?;
                 }
                 let _ = writer.flush();
                 break;
@@ -27,7 +38,7 @@ pub fn headtail(opts: &Opts) -> Result<()> {
             Ok(_) => {
                 if opts.head > line_num {
                     line_num += 1;
-                    let _ = writer.write(line.as_bytes())?;
+                    careful_write(&mut writer, &line)?;
                     let _ = writer.flush();
                 } else {
                     tail_buffer.push_back(line);
@@ -49,10 +60,13 @@ pub fn headtail(opts: &Opts) -> Result<()> {
             match reader.read_line(&mut line) {
                 Ok(0) => {}
                 Ok(_) => {
-                    let _ = writer.write(line.as_bytes())?;
+                    careful_write(&mut writer, &line)?;
                     let _ = writer.flush();
                 }
-                Err(e) => return Err(e),
+                Err(e) => {
+                    println!("The error is {:?}", e.kind());
+                    return Err(e);
+                }
             }
             // TODO: Is this a busy loop? Do we need to sleep or something?
         }
