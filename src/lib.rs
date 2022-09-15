@@ -2,8 +2,7 @@ pub mod opts;
 
 use std::{
     collections::VecDeque,
-    fs::File,
-    io::{self, BufRead, BufReader, BufWriter, ErrorKind, Result, Write},
+    io::{BufRead, ErrorKind, Result, Write},
 };
 
 use opts::Opts;
@@ -20,16 +19,8 @@ fn careful_write(writer: &mut dyn Write, line: &str) -> Result<()> {
 }
 
 pub fn headtail(opts: &Opts) -> Result<()> {
-    // Way to read from a file or stdout
-    let mut reader: Box<dyn BufRead> = if opts.filename.is_some() {
-        let file = File::open(opts.filename.as_ref().unwrap())?;
-        Box::new(BufReader::new(file))
-    } else {
-        Box::new(BufReader::new(io::stdin()))
-    };
-
-    // Way to write to stdout (and maybe in the future to a file)
-    let mut writer: Box<dyn Write> = Box::new(BufWriter::new(io::stdout()));
+    let mut reader = opts.input_stream()?;
+    let mut writer = opts.output_stream()?;
 
     // Do our head/tail thing
     let mut tail_buffer: VecDeque<String> = VecDeque::with_capacity(opts.tail + 1);
