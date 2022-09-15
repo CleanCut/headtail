@@ -18,7 +18,7 @@ TODO:
   - [ ] Improve Readme
   - [ ] More integration tests
   - [ ] Benchmark tests (see [criterion](https://bheisler.github.io/criterion.rs/book/index.html))
-- After initial implementation
+- [ ] After initial implementation
   - [ ] Any `TODO`s
   - [ ] Option to output to file
   - [ ] Better error handling
