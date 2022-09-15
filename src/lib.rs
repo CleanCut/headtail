@@ -55,13 +55,14 @@ pub fn headtail(opts: &Opts) -> Result<()> {
     // Keep following(?)
 
     if opts.follow && opts.filename.is_some() {
+        let sleep_interval = Duration::from_secs_f64(opts.sleep_interval);
         let mut line = String::new();
         loop {
             line.clear();
             match reader.read_line(&mut line) {
                 Ok(0) => {
                     // This is a busy loop, so add a little sleep to make it less CPU hungry
-                    std::thread::sleep(Duration::from_millis(25));
+                    std::thread::sleep(sleep_interval);
                 }
                 Ok(_) => {
                     careful_write(&mut writer, &line)?;
