@@ -11,7 +11,7 @@ fn help() {
             let stdout = String::from_utf8_lossy(&output.stdout);
             assert!(stdout.contains("USAGE"));
             assert!(stdout.contains("headtail"));
-            assert!(stdout.contains("filename"));
+            assert!(stdout.contains("FILENAME"));
             assert!(stdout.contains("-H"));
             assert!(stdout.contains("-T"));
         }
