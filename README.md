@@ -37,7 +37,8 @@ $ headtail somebigfile.txt -H 25 -T 5
 # Print the default amount of first lines, but only 3 last lines
 $ headtail somebigfile.txt -T 3
 
-# Do the default thing...but then keep tailing the file and print out anything new appended to it
+# Do the default thing...but then keep tailing the file and print
+# out anything new that is appended to it.
 $ headtail somebigfile.txt -f
 ```
 
