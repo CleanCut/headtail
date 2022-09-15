@@ -1,3 +1,5 @@
+use std::fs::File;
+use std::io::{BufRead, BufReader};
 use std::process::Command;
 
 #[test]
@@ -86,4 +88,79 @@ fn tail() {
     }
 }
 
+#[test]
+fn head_length_exceeds_file_length() {
+    let expected_lines = number_of_input_lines();
+    let head_lines = 64;
+    assert!(expected_lines < head_lines, "Expected input file to have fewer than {} lines (otherwise this test doesn't test anything)", head_lines);
+
+    match Command::new(env!("CARGO_BIN_EXE_headtail"))
+        .arg("tests/files/input.txt")
+        .arg("-H")
+        .arg(head_lines.to_string())
+        .arg("-T")
+        .arg("0")
+        .output()
+    {
+        Ok(output) => {
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            let num_lines = stdout.lines().count();
+            assert_eq!(num_lines, expected_lines);
+        }
+        Err(e) => println!("Error: {}", e),
+    }
+}
+
+#[test]
+fn tail_length_exceeds_file_length() {
+    let expected_lines = number_of_input_lines();
+    let tail_lines = 64;
+    assert!(expected_lines < tail_lines, "Expected input file to have fewer than {} lines (otherwise this test doesn't test anything)", tail_lines);
+
+    match Command::new(env!("CARGO_BIN_EXE_headtail"))
+        .arg("tests/files/input.txt")
+        .arg("-H")
+        .arg("0")
+        .arg("-T")
+        .arg(tail_lines.to_string())
+        .output()
+    {
+        Ok(output) => {
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            let num_lines = stdout.lines().count();
+            assert_eq!(num_lines, expected_lines);
+        }
+        Err(e) => println!("Error: {}", e),
+    }
+}
+
+#[test]
+fn overlapping_head_and_tail() {
+    let expected_lines = number_of_input_lines();
+    let head_lines = 20;
+    let tail_lines = 20;
+    assert!(expected_lines < head_lines + tail_lines, "Expected input file to have fewer than {} lines (otherwise this test doesn't test anything)", head_lines + tail_lines);
+
+    match Command::new(env!("CARGO_BIN_EXE_headtail"))
+        .arg("tests/files/input.txt")
+        .arg("-H")
+        .arg(head_lines.to_string())
+        .arg("-T")
+        .arg(tail_lines.to_string())
+        .output()
+    {
+        Ok(output) => {
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            let num_lines = stdout.lines().count();
+            assert_eq!(num_lines, expected_lines);
+        }
+        Err(e) => println!("Error: {}", e),
+    }
+}
+
 // TODO: Add test for -f/--follow
+
+fn number_of_input_lines() -> usize {
+    let f = BufReader::new(File::open("tests/files/input.txt").unwrap());
+    f.lines().count()
+}
