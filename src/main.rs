@@ -1,4 +1,4 @@
-use std::io::Result;
+use headtail::errors::Result;
 
 use headtail::{headtail, opts::Opts};
 

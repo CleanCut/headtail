@@ -1,14 +1,16 @@
+pub mod errors;
 pub mod opts;
 
 use std::{
     collections::VecDeque,
-    io::{BufRead, ErrorKind, Result, Write},
+    io::{self, BufRead, ErrorKind, Write},
     time::Duration,
 };
 
+use errors::Result;
 use opts::Opts;
 
-fn careful_write(writer: &mut dyn Write, line: &str) -> Result<()> {
+fn careful_write(writer: &mut dyn Write, line: &str) -> io::Result<()> {
     if let Err(e) = writer.write(line.as_bytes()) {
         if e.kind() == ErrorKind::BrokenPipe {
             return Ok(());
@@ -28,15 +30,15 @@ pub fn headtail(opts: &Opts) -> Result<()> {
     let mut line_num = 0;
     loop {
         let mut line = String::new();
-        match reader.read_line(&mut line) {
-            Ok(0) => {
+        match reader.read_line(&mut line)? {
+            0 => {
                 for tail_line in &tail_buffer {
                     careful_write(&mut writer, tail_line)?;
                 }
                 let _ = writer.flush();
                 break;
             }
-            Ok(_) => {
+            _ => {
                 if opts.head > line_num {
                     line_num += 1;
                     careful_write(&mut writer, &line)?;
@@ -48,7 +50,6 @@ pub fn headtail(opts: &Opts) -> Result<()> {
                     }
                 }
             }
-            Err(e) => return Err(e),
         }
     }
 
