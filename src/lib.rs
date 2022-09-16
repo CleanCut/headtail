@@ -3,7 +3,7 @@ pub mod opts;
 
 use std::{
     collections::VecDeque,
-    io::{self, BufRead, ErrorKind, Write},
+    io::{BufRead, ErrorKind, Write},
     path::Path,
     time::Duration,
 };
@@ -13,12 +13,12 @@ use notify::{event::EventKind, Event, Watcher};
 use errors::Result;
 use opts::Opts;
 
-fn careful_write(writer: &mut dyn Write, line: &str) -> io::Result<()> {
+fn careful_write(writer: &mut dyn Write, line: &str) -> Result<()> {
     if let Err(e) = writer.write(line.as_bytes()) {
         if e.kind() == ErrorKind::BrokenPipe {
             return Ok(());
         } else {
-            return Err(e);
+            return Err(errors::HeadTailError::IOError(e));
         }
     }
     Ok(())
@@ -85,7 +85,7 @@ pub fn headtail(opts: &Opts) -> Result<()> {
                         Ok(_) => {
                             match careful_write(&mut writer, &line) {
                                 Ok(_) => {}
-                                Err(e) => eprintln!("Write error: {:?}", e.kind()),
+                                Err(e) => eprintln!("Write error: {:?}", e),
                             }
                             let _ = writer.flush();
                         }
