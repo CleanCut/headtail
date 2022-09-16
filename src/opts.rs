@@ -44,8 +44,8 @@ impl Opts {
     }
 
     /// Stream to receive input from. Either the file passed, or stdin otherwise.
-    pub fn input_stream(&self) -> std::io::Result<Box<dyn BufRead>> {
-        let stream: Box<dyn BufRead> = match self.filename {
+    pub fn input_stream(&self) -> std::io::Result<Box<dyn BufRead + Send>> {
+        let stream: Box<dyn BufRead + Send> = match self.filename {
             Some(ref filename) => {
                 let file = OpenOptions::new().read(true).open(filename)?;
                 Box::new(BufReader::new(file))
@@ -56,8 +56,8 @@ impl Opts {
     }
 
     /// Stream to write output to. Either the file passed, or stdout otherwise.
-    pub fn output_stream(&self) -> std::io::Result<Box<dyn Write>> {
-        let stream: Box<dyn Write> = match self.outfile {
+    pub fn output_stream(&self) -> std::io::Result<Box<dyn Write + Send>> {
+        let stream: Box<dyn Write + Send> = match self.outfile {
             Some(ref filename) => {
                 let file = OpenOptions::new().write(true).create(true).open(filename)?;
                 Box::new(BufWriter::new(file))
