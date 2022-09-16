@@ -102,7 +102,7 @@ pub fn headtail(opts: &Opts) -> Result<()> {
         )?;
 
         watcher.watch(
-            Path::new(&opts.filename.as_ref().unwrap()),
+            Path::new(opts.filename.as_ref().unwrap()),
             notify::RecursiveMode::NonRecursive,
         )?;
 
