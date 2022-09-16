@@ -76,8 +76,8 @@ pub fn headtail(opts: &Opts) -> Result<()> {
         let config = notify::Config::default().with_poll_interval(sleep_interval);
 
         // Setup the file watcher
-        let mut watcher =
-            notify::RecommendedWatcher::new(move |res: notify::Result<notify::Event>| match res {
+        let mut watcher = notify::RecommendedWatcher::new(
+            move |res: notify::Result<notify::Event>| match res {
                 Ok(event) if is_modification(&event) => {
                     line.clear();
                     match reader.read_line(&mut line) {
@@ -97,7 +97,9 @@ pub fn headtail(opts: &Opts) -> Result<()> {
                 }
                 Ok(_) => {}
                 Err(e) => eprintln!("Watcher error: {:?}", e),
-            }, config)?;
+            },
+            config,
+        )?;
 
         watcher.watch(
             Path::new(&opts.filename.as_ref().unwrap()),
