@@ -2,17 +2,9 @@
 
 `head` and `tail` simultaneously
 
-Easy Ways to Contribute!
-- [ ] Set up CodeQL
-- [ ] Set up Dependabot
-- [ ] Improve Readme
-- [ ] Add integration test for -f/--follow
-- [ ] Add integration test for -s/--sleep-interval
-- [ ] Add (any) unit tests
-- [ ] Add (any) benchmark tests (see [criterion](https://bheisler.github.io/criterion.rs/book/index.html))
-- [ ] Add option to output to file
-- [ ] Find out if this even works on Windows
-- [ ] Make demo video for readme (put the video in a PR/issue comment and use the URL in the readme)
+## Contributing
+
+Contributions are welcome! Here are some [good first issues](https://github.com/CleanCut/headtail/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) you could look into.
 
 ## Quick Start
 
