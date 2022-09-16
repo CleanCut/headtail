@@ -4,8 +4,11 @@ pub mod opts;
 use std::{
     collections::VecDeque,
     io::{self, BufRead, ErrorKind, Write},
+    path::Path,
     time::Duration,
 };
+
+use notify::{event::EventKind, Event, Watcher};
 
 use errors::Result;
 use opts::Opts;
@@ -54,28 +57,66 @@ pub fn headtail(opts: &Opts) -> Result<()> {
     }
 
     // Keep following(?)
-
+    //
+    // To avoid wasted CPU cycles, we can use a file system watcher (e.g.
+    // `inotify(7)` on Linux).
+    //
+    // The `notify` crate provides several optimized file system watchers using
+    // functionality built into operating systems. Should an optimized watcher
+    // not be available, `notify` will default to a polling watcher.
     if opts.follow && opts.filename.is_some() {
-        let sleep_interval = Duration::from_secs_f64(opts.sleep_interval);
         let mut line = String::new();
-        loop {
-            line.clear();
-            match reader.read_line(&mut line) {
-                Ok(0) => {
-                    // This is a busy loop, so add a little sleep to make it less CPU hungry
-                    std::thread::sleep(sleep_interval);
+
+        // Use a channel for synchronization between the watcher and the main
+        // thread.
+        let (tx, rx) = std::sync::mpsc::channel();
+
+        // If using a polling watcher, respect the `--sleep-interval` argument.
+        let sleep_interval = Duration::from_secs_f64(opts.sleep_interval);
+        let config = notify::Config::default().with_poll_interval(sleep_interval);
+
+        // Setup the file watcher
+        let mut watcher =
+            notify::RecommendedWatcher::new(move |res: notify::Result<notify::Event>| match res {
+                Ok(event) if is_modification(&event) => {
+                    line.clear();
+                    match reader.read_line(&mut line) {
+                        Ok(0) => {}
+                        Ok(_) => {
+                            match careful_write(&mut writer, &line) {
+                                Ok(_) => {}
+                                Err(e) => eprintln!("Write error: {:?}", e.kind()),
+                            }
+                            let _ = writer.flush();
+                        }
+                        Err(e) => {
+                            eprintln!("The error is {:?}", e.kind());
+                        }
+                    }
+                    tx.send(()).unwrap();
                 }
-                Ok(_) => {
-                    careful_write(&mut writer, &line)?;
-                    let _ = writer.flush();
-                }
-                Err(e) => {
-                    println!("The error is {:?}", e.kind());
-                    return Err(e);
-                }
-            }
-        }
+                Ok(_) => {}
+                Err(e) => eprintln!("Watcher error: {:?}", e),
+            }, config)?;
+
+        watcher.watch(
+            Path::new(&opts.filename.as_ref().unwrap()),
+            notify::RecursiveMode::NonRecursive,
+        )?;
+
+        // Loop over the messages in the channel. This will block the main
+        // thread without sleeping.
+        //
+        // TODO: use the channel to communicate errors with the watching thread,
+        // and stop the process.
+        for _ in rx {}
     }
 
     Ok(())
+}
+
+/// Determine if an event is a modification
+#[inline]
+fn is_modification(event: &Event) -> bool {
+    matches!(event.kind, EventKind::Modify(_))
 }
