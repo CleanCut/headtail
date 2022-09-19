@@ -8,5 +8,3 @@ pub enum HeadTailError {
     #[error("File watcher error: {0}")]
     FileWatcherError(#[from] notify::Error),
 }
-
-pub type Result<T> = std::result::Result<T, HeadTailError>;

@@ -1,8 +1,6 @@
-use headtail::errors::Result;
+use headtail::{errors::HeadTailError, headtail, opts::Opts};
 
-use headtail::{headtail, opts::Opts};
-
-fn main() -> Result<()> {
+fn main() -> Result<(), HeadTailError> {
     let opts = Opts::parse_args();
     //println!("{opts:#?}");
     headtail(&opts)?;

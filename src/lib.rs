@@ -8,23 +8,23 @@ use std::{
     time::Duration,
 };
 
+use errors::HeadTailError;
 use notify::{event::EventKind, Event, Watcher};
 
-use errors::Result;
 use opts::Opts;
 
-fn careful_write(writer: &mut dyn Write, line: &str) -> Result<()> {
+fn careful_write(writer: &mut dyn Write, line: &str) -> Result<(), HeadTailError> {
     if let Err(e) = writer.write(line.as_bytes()) {
         if e.kind() == ErrorKind::BrokenPipe {
             return Ok(());
         } else {
-            return Err(errors::HeadTailError::IOError(e));
+            return Err(HeadTailError::IOError(e));
         }
     }
     Ok(())
 }
 
-pub fn headtail(opts: &Opts) -> Result<()> {
+pub fn headtail(opts: &Opts) -> Result<(), HeadTailError> {
     let mut reader = opts.input_stream()?;
     let mut writer = opts.output_stream()?;
 
