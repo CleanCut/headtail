@@ -1,6 +1,12 @@
 # headtail
 
-`head` and `tail` simultaneously
+`head` and `tail` simultaneously!
+
+## Backstory
+
+[I](https://github.com/CleanCut) needed a way to head _and_ tail the output of a refactoring project I was working on, since I wanted to see the error at the top of the output and the summary at the bottom of the output. I couldn't find a good way to combine existing utilities to do the job, and a [couple](https://github.com/jorendorff) [friends](https://github.com/bensherman) suggested I make one. We ended up doing a "day of learning" session with about 50 other engineers from GitHub and in less than three hours, we came up with an mvp.
+
+Now it's a real project! Go try it out!
 
 ## Contributing
 
