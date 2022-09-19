@@ -18,7 +18,7 @@ fn careful_write(writer: &mut dyn Write, line: &str) -> Result<(), HeadTailError
         if e.kind() == ErrorKind::BrokenPipe {
             return Ok(());
         } else {
-            return Err(HeadTailError::IOError(e));
+            return Err(e.into());
         }
     }
     Ok(())
