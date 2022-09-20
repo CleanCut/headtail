@@ -56,7 +56,7 @@ pub fn headtail(opts: &Opts) -> Result<(), HeadTailError> {
         }
     }
 
-    // Keep following(?)
+    // Keep following
     //
     // To avoid wasted CPU cycles, we can use a file system watcher (e.g.
     // `inotify(7)` on Linux).
