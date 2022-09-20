@@ -21,8 +21,8 @@ pub struct Opts {
         long = "follow"
     )]
     pub follow: bool,
-    #[clap(short = 's', long = "sleep-interval", default_value_t = 0.025)]
     /// When following a file, sleep this amount in seconds between polling for changes.
+    #[clap(short = 's', long = "sleep-interval", default_value_t = 0.025)]
     pub sleep_interval: f64,
 
     /// Write output to file
