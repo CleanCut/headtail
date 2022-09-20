@@ -77,26 +77,29 @@ pub fn headtail(opts: &Opts) -> Result<(), HeadTailError> {
 
         // Setup the file watcher
         let mut watcher = notify::RecommendedWatcher::new(
-            move |res: notify::Result<notify::Event>| match res {
-                Ok(event) if is_modification(&event) => {
-                    line.clear();
-                    match reader.read_line(&mut line) {
-                        Ok(0) => {}
-                        Ok(_) => {
-                            match careful_write(&mut writer, &line) {
-                                Ok(_) => {}
-                                Err(e) => eprintln!("Write error: {:?}", e),
+            move |res: notify::Result<notify::Event>| {
+                use EventKind::Modify;
+                match res {
+                    Ok(event) if matches!(event.kind, Modify(_)) => {
+                        line.clear();
+                        match reader.read_line(&mut line) {
+                            Ok(0) => {}
+                            Ok(_) => {
+                                match careful_write(&mut writer, &line) {
+                                    Ok(_) => {}
+                                    Err(e) => eprintln!("Write error: {:?}", e),
+                                }
+                                let _ = writer.flush();
                             }
-                            let _ = writer.flush();
+                            Err(e) => {
+                                eprintln!("The error is {:?}", e.kind());
+                            }
                         }
-                        Err(e) => {
-                            eprintln!("The error is {:?}", e.kind());
-                        }
+                        tx.send(()).unwrap();
                     }
-                    tx.send(()).unwrap();
+                    Ok(_) => {}
+                    Err(e) => eprintln!("Watcher error: {:?}", e),
                 }
-                Ok(_) => {}
-                Err(e) => eprintln!("Watcher error: {:?}", e),
             },
             config,
         )?;
@@ -115,10 +118,4 @@ pub fn headtail(opts: &Opts) -> Result<(), HeadTailError> {
     }
 
     Ok(())
-}
-
-/// Determine if an event is a modification
-#[inline]
-fn is_modification(event: &Event) -> bool {
-    matches!(event.kind, EventKind::Modify(_))
 }
