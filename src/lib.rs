@@ -80,6 +80,9 @@ pub fn headtail(opts: &Opts) -> Result<(), HeadTailError> {
             move |res: notify::Result<notify::Event>| {
                 use EventKind::Modify;
                 match res {
+                    // TODO: This is probably the place to detect if a file was
+                    // renamed/removed and a new one of the same name created
+                    // (in a later PR)
                     Ok(event) if matches!(event.kind, Modify(_)) => {
                         line.clear();
                         match reader.read_line(&mut line) {
