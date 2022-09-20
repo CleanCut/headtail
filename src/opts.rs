@@ -5,7 +5,7 @@ use std::{
 
 use clap::Parser;
 
-#[derive(Debug, clap::Parser)]
+#[derive(Clone, Debug, clap::Parser)]
 pub struct Opts {
     #[clap(help = "Read from a file instead of stdin")]
     pub filename: Option<String>,

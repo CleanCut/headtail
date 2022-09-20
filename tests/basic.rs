@@ -1,6 +1,14 @@
-use std::fs::File;
-use std::io::{BufRead, BufReader};
-use std::process::Command;
+use std::fs::{File, OpenOptions};
+use std::io::{BufRead, BufReader, Result, Write};
+use std::process::{Command, Stdio};
+use std::time::Duration;
+
+use tempfile::NamedTempFile;
+
+fn number_of_input_lines() -> usize {
+    let f = BufReader::new(File::open("tests/files/input.txt").unwrap());
+    f.lines().count()
+}
 
 #[test]
 fn help() {
@@ -160,7 +168,52 @@ fn overlapping_head_and_tail() {
 
 // TODO: Add test for -f/--follow
 
-fn number_of_input_lines() -> usize {
-    let f = BufReader::new(File::open("tests/files/input.txt").unwrap());
-    f.lines().count()
+#[test]
+fn follow_detects_recreation() -> Result<()> {
+    // create a temporary file
+    // Write
+    println!("1");
+    let mut tmpfile = NamedTempFile::new()?;
+    write!(tmpfile, "first file\n")?;
+    let tmpfilename = tmpfile.into_temp_path();
+    println!("2");
+
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_headtail"))
+        .arg(&tmpfilename)
+        .arg("--follow")
+        .stdout(Stdio::piped())
+        .spawn()?;
+    println!("3");
+
+    std::fs::remove_file(&tmpfilename)?;
+    println!("4");
+
+    let mut newfile = OpenOptions::new()
+        .create(true)
+        .read(true)
+        .write(true)
+        .open(tmpfilename)?;
+    println!("5");
+
+    write!(newfile, "second file\n")?;
+    println!("6");
+
+    let _ = newfile.flush();
+    drop(newfile);
+    println!("7");
+
+    std::thread::sleep(Duration::from_millis(100));
+    cmd.kill()?;
+    println!("8");
+
+    match cmd.wait_with_output() {
+        Ok(output) => {
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            println!("AAAAAAAAA {} BBBBBBBB {}", stdout, output.status.success());
+            assert!(stdout.contains("first file"));
+            assert!(stdout.contains("second file"));
+        }
+        Err(e) => println!("Error: {}", e),
+    }
+    Ok(())
 }

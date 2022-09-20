@@ -9,6 +9,7 @@ use std::{
 };
 
 use errors::HeadTailError;
+use log::trace;
 use notify::{event::EventKind, Event, Watcher};
 
 use opts::Opts;
@@ -65,38 +66,90 @@ pub fn headtail(opts: &Opts) -> Result<(), HeadTailError> {
     // functionality built into operating systems. Should an optimized watcher
     // not be available, `notify` will default to a polling watcher.
     if opts.follow && opts.filename.is_some() {
-        let mut line = String::new();
-
-        // Use a channel for synchronization between the watcher and the main
-        // thread.
-        let (tx, rx) = std::sync::mpsc::channel();
+        // Use a channel to send lines read back to the main thread
+        // TODO: 1024 is an arbitrary number. Let's benchmark different values.
+        let (tx, rx) = crossbeam_channel::bounded::<Result<String, HeadTailError>>(1024);
 
         // If using a polling watcher, respect the `--sleep-interval` argument.
         let sleep_interval = Duration::from_secs_f64(opts.sleep_interval);
         let config = notify::Config::default().with_poll_interval(sleep_interval);
 
         // Setup the file watcher
+        let opts2 = opts.clone(); // TODO: Refactor so we don't need to clone opts
         let mut watcher = notify::RecommendedWatcher::new(
-            move |res: notify::Result<notify::Event>| match res {
-                Ok(event) if is_modification(&event) => {
-                    line.clear();
-                    match reader.read_line(&mut line) {
-                        Ok(0) => {}
-                        Ok(_) => {
-                            match careful_write(&mut writer, &line) {
-                                Ok(_) => {}
-                                Err(e) => eprintln!("Write error: {:?}", e),
+            move |res: notify::Result<notify::Event>| {
+                match res {
+                    Ok(event) => {
+                        match event.kind {
+                            EventKind::Any => trace!("EventKind::Any encountered"),
+                            EventKind::Modify(m) => {
+                                // TODO: Should(can?) we handle the truncation of a file? On macOS
+                                // file truncation shows up as an EventKind::Modify(Metadata(Any)),
+                                // which seems like could apply to events other than truncation.
+                                trace!(target: "following file", "modified: {:?}", m);
+                                let mut line = String::new();
+                                match reader.read_line(&mut line) {
+                                    Ok(0) => {}
+                                    Ok(_) => {
+                                        // If the main thread has closed the channel, it will soon cause
+                                        // us to exit cleanly, so we can ignore the error.
+                                        let _ = tx.send(Ok(line));
+                                    }
+                                    Err(e) => {
+                                        // Can ignore channel send error for the same reason as above...
+                                        trace!(target: "following file", "normal read error");
+                                        let _ = tx.send(Err(e.into()));
+                                    }
+                                }
                             }
-                            let _ = writer.flush();
-                        }
-                        Err(e) => {
-                            eprintln!("The error is {:?}", e.kind());
-                        }
+                            EventKind::Create(_) => {
+                                trace!(target: "following file", "detected file (re)creation");
+                                // The file has been recreated, so we need to re-open the input stream,
+                                // read *everything* that is in the new file, and resume tailing.
+                                let result = opts2.input_stream();
+                                if result.is_ok() {
+                                    trace!(target: "following file", "succeeded reopening file");
+                                    reader = result.unwrap();
+                                } else {
+                                    // Can ignore channel send error for the same reason as above...
+                                    let _ = tx.send(Err(result.err().unwrap().into()));
+                                }
+                                loop {
+                                    let mut line = String::new();
+                                    match reader.read_line(&mut line) {
+                                        Ok(0) => {
+                                            trace!(target: "following file", "catchup done");
+                                            break;
+                                        }
+                                        Ok(_) => {
+                                            trace!(target: "following file", "catchup read line");
+                                            // If the main thread has closed the channel, it will soon cause us to
+                                            // exit cleanly, so we can ignore the error.
+                                            let _ = tx.send(Ok(line));
+                                        }
+                                        Err(e) => {
+                                            // Can ignore sending error for same reason as 👆🏻
+                                            let _ = tx.send(Err(e.into()));
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            EventKind::Remove(r) => {
+                                trace!(target: "following file", "file removed: {:?}", r)
+                            }
+                            // We are being explicit about the variants we are ignoring just in case we
+                            // need to research them.
+                            EventKind::Access(_) => {}
+                            EventKind::Other => {
+                                trace!(target: "following file", "EventKind::Other encountered")
+                            }
+                        };
                     }
-                    tx.send(()).unwrap();
+                    Err(e) => {
+                        let _ = tx.send(Err(e.into()));
+                    }
                 }
-                Ok(_) => {}
-                Err(e) => eprintln!("Watcher error: {:?}", e),
             },
             config,
         )?;
@@ -106,19 +159,14 @@ pub fn headtail(opts: &Opts) -> Result<(), HeadTailError> {
             notify::RecursiveMode::NonRecursive,
         )?;
 
-        // Loop over the messages in the channel. This will block the main
-        // thread without sleeping.
-        //
-        // TODO: use the channel to communicate errors with the watching thread,
-        // and stop the process.
-        for _ in rx {}
+        // Loop over the lines sent from the `notify` watcher over a channel. This will block the
+        // main thread without sleeping.
+        for result in rx {
+            let line = result?;
+            careful_write(&mut writer, &line)?;
+            let _ = writer.flush();
+        }
     }
 
     Ok(())
-}
-
-/// Determine if an event is a modification
-#[inline]
-fn is_modification(event: &Event) -> bool {
-    matches!(event.kind, EventKind::Modify(_))
 }
