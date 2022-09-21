@@ -162,6 +162,8 @@ pub fn headtail(opts: &Opts) -> Result<(), HeadTailError> {
             config,
         )?;
 
+        // TODO: Figure out what to do about the possibility of a race condition between the initial
+        // headtail and the following. See https://github.com/CleanCut/headtail/pull/17/files#r973220630
         watcher.watch(
             Path::new(opts.filename.as_ref().unwrap()),
             notify::RecursiveMode::NonRecursive,
