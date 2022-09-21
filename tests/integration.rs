@@ -171,7 +171,7 @@ fn overlapping_head_and_tail() {
 #[test]
 fn follow_detects_recreation() -> Result<()> {
     if let Ok(ci_var) = std::env::var("CI") {
-        if !ci_var.is_empty() && cfg!(linux) {
+        if !ci_var.is_empty() && cfg!(target_os = "linux") {
             eprintln!("WARNING: Ignoring follow_detects_recreation test on Linux CI since this feature doesn't work with the fallback polling strategy.");
             return Ok(());
         }
