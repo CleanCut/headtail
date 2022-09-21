@@ -170,7 +170,7 @@ fn overlapping_head_and_tail() {
 
 #[test]
 fn follow_detects_recreation() -> Result<()> {
-    let wait_duration = Duration::from_millis(100); // 4 times higher than minimum required for my machine - cleancut
+    let wait_duration = Duration::from_millis(250); // 10 times higher than minimum required for my machine - cleancut
     let first_file_contents = "first file\n";
     let second_file_contents = "second file\n";
 
