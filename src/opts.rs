@@ -5,7 +5,7 @@ use std::{
 
 use clap::Parser;
 
-#[derive(Debug, clap::Parser)]
+#[derive(Clone, Debug, clap::Parser)]
 pub struct Opts {
     /// Read from a file instead of stdin
     pub filename: Option<String>,
@@ -16,12 +16,15 @@ pub struct Opts {
     #[clap(short = 'T', long = "tail", default_value_t = 10)]
     pub tail: usize,
     #[clap(
-        help = "Wait for additional data to be appended to a file. Ignored if standard input is a pipe.",
+        help = "Wait for additional data to be appended to a file. Ignored if standard input is a \
+            pipe. If a `notify`-compatible filesystem watcher is available, that will be used. If \
+            not, we will fall back to a polling watcher.",
         short = 'f',
         long = "follow"
     )]
     pub follow: bool,
-    /// When following a file, sleep this amount in seconds between polling for changes.
+    /// When following a file, sleep this amount in seconds between polling for changes. Ignored if
+    /// a `notify`-compatible watcher is available.
     #[clap(short = 's', long = "sleep-interval", default_value_t = 0.025)]
     pub sleep_interval: f64,
 
@@ -36,8 +39,8 @@ impl Opts {
     }
 
     /// Stream to receive input from. Either the file passed, or stdin otherwise.
-    pub fn input_stream(&self) -> std::io::Result<Box<dyn BufRead>> {
-        let stream: Box<dyn BufRead> = match self.filename {
+    pub fn input_stream(&self) -> std::io::Result<Box<dyn BufRead + Send>> {
+        let stream: Box<dyn BufRead + Send> = match self.filename {
             Some(ref filename) => {
                 let file = OpenOptions::new().read(true).open(filename)?;
                 Box::new(BufReader::new(file))
@@ -48,8 +51,8 @@ impl Opts {
     }
 
     /// Stream to write output to. Either the file passed, or stdout otherwise.
-    pub fn output_stream(&self) -> std::io::Result<Box<dyn Write>> {
-        let stream: Box<dyn Write> = match self.outfile {
+    pub fn output_stream(&self) -> std::io::Result<Box<dyn Write + Send>> {
+        let stream: Box<dyn Write + Send> = match self.outfile {
             Some(ref filename) => {
                 let file = OpenOptions::new().write(true).create(true).open(filename)?;
                 Box::new(BufWriter::new(file))

@@ -1,8 +1,7 @@
-use std::io::Result;
+use headtail::{errors::HeadTailError, headtail, opts::Opts};
 
-use headtail::{headtail, opts::Opts};
-
-fn main() -> Result<()> {
+fn main() -> Result<(), HeadTailError> {
+    env_logger::init();
     let opts = Opts::parse_args();
     //println!("{opts:#?}");
     headtail(&opts)?;

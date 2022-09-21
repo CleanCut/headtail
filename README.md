@@ -19,9 +19,6 @@ You need to [have Rust installed](https://www.rust-lang.org/tools/install).
 ```shell
 # Install latest *release* version of headtail
 $ cargo install headtail
-
-# Install local development version of headtail from inside the git repo
-$ cargo install --path .
 ```
 
 ```
@@ -43,6 +40,19 @@ $ headtail somebigfile.txt -f
 ```
 
 See `headtail -h` for a full list of command-line options.
+
+## Development
+
+```
+# Run locally with arguments
+$ cargo run -- YOUR_ARGS_GO_HERE
+
+# Enable debug logging
+$ RUST_LOG=trace cargo run -- YOUR_ARGS_GO_HERE
+
+# Install local development version of headtail into your ~/.cargo/bin
+$ cargo install --path .
+```
 
 ## Software License
 

@@ -1,6 +1,15 @@
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- CI now runs on macOS in addition to Linux. Now we just need someone to help us [support Windows](https://github.com/CleanCut/headtail/issues/21)!
+
+### Improved
+
+- We now use a notify-based watcher (inotify on Linux, etc.) when available to avoid polling.
+- Internal improvements.
+
 ## [0.3.0] - 2022-09-15
 
 ### Added

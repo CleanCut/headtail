@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
 env:
@@ -12,33 +12,38 @@ env:
 
 jobs:
   test:
-
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Fetch cargo registry cache
-      uses: actions/cache@v3
-      continue-on-error: false
-      with:
-        path: |
-          ~/.cargo/bin/
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-          target/
-          Cargo.lock
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-    
-    - name: Build
-      run: cargo build --verbose
+      - uses: actions/checkout@v3
 
-    - name: rustfmt & clippy
-      run: |
-        rustup component add clippy rustfmt
-        cargo clippy --workspace
-        cargo fmt --all -- --check
+      - name: Fetch cargo registry cache
+        uses: actions/cache@v3
+        continue-on-error: false
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+            Cargo.lock
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-    - name: Run tests
-      run: cargo test --verbose
+      - name: Build
+        run: cargo build
+
+      - name: rustfmt & clippy
+        run: |
+          rustup component add clippy rustfmt
+          cargo clippy --workspace
+          cargo fmt --all -- --check
+
+      - name: Run tests
+        run: cargo test -- --show-output
+        env:
+          RUST_LOG: trace

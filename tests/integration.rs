@@ -1,6 +1,14 @@
 use std::fs::File;
-use std::io::{BufRead, BufReader};
-use std::process::Command;
+use std::io::{BufRead, BufReader, Result, Write};
+use std::process::{Command, Stdio};
+use std::time::Duration;
+
+use tempfile::NamedTempFile;
+
+fn number_of_input_lines() -> usize {
+    let f = BufReader::new(File::open("tests/files/input.txt").unwrap());
+    f.lines().count()
+}
 
 #[test]
 fn help() {
@@ -160,7 +168,70 @@ fn overlapping_head_and_tail() {
 
 // TODO: Add test for -f/--follow
 
-fn number_of_input_lines() -> usize {
-    let f = BufReader::new(File::open("tests/files/input.txt").unwrap());
-    f.lines().count()
+#[test]
+fn follow_detects_recreation() -> Result<()> {
+    if let Ok(ci_var) = std::env::var("CI") {
+        if !ci_var.is_empty() && cfg!(target_os = "linux") {
+            eprintln!("WARNING: Ignoring follow_detects_recreation test on Linux CI since this feature doesn't work with the fallback polling strategy.");
+            return Ok(());
+        }
+    }
+    let wait_duration = Duration::from_millis(125); // 5 times higher than minimum required for my machine - cleancut
+    let first_file_contents = "first file\n";
+    let second_file_contents = "second file\n";
+
+    // create a temporary file
+    let just_for_name_file = NamedTempFile::new()?;
+    let tmpfilename = just_for_name_file.path().to_owned();
+    drop(just_for_name_file);
+    // give filesystem time to really delete the file
+    std::thread::sleep(wait_duration);
+
+    let mut tmpfile = File::create(&tmpfilename)?;
+    write!(tmpfile, "{}", first_file_contents)?;
+    let _ = tmpfile.flush();
+    drop(tmpfile);
+
+    // give filesystem time to write file contents and close file
+    std::thread::sleep(wait_duration);
+
+    let mut cmd = Command::new(env!("CARGO_BIN_EXE_headtail"))
+        .arg(&tmpfilename)
+        .arg("--follow")
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()?;
+
+    // Give headtail sufficient time to open the file and read it
+    std::thread::sleep(wait_duration);
+
+    // give filesystem time to really delete the file
+    std::fs::remove_file(&tmpfilename)?;
+
+    std::thread::sleep(wait_duration);
+
+    let mut newfile = File::create(&tmpfilename)?;
+    write!(newfile, "{}", second_file_contents)?;
+    let _ = newfile.flush();
+    drop(newfile);
+
+    // give filesystem time to write file contents and close file
+    std::thread::sleep(wait_duration);
+
+    cmd.kill()?;
+
+    match cmd.wait_with_output() {
+        Ok(output) => {
+            println!(
+                "stderr was: `{}`",
+                String::from_utf8_lossy(&output.stderr).to_string()
+            );
+            let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+            let mut combined = first_file_contents.to_owned();
+            combined.push_str(second_file_contents);
+            assert_eq!(combined, stdout);
+        }
+        Err(e) => println!("Error: {}", e),
+    }
+    Ok(())
 }
