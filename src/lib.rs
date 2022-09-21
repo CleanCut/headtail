@@ -45,6 +45,7 @@ pub fn headtail(opts: &Opts) -> Result<(), HeadTailError> {
             _ => {
                 if opts.head > line_num {
                     line_num += 1;
+                    trace!(target: "head line", "read line: {}", line.trim_end());
                     careful_write(&mut writer, &line)?;
                     let _ = writer.flush();
                 } else {
@@ -103,7 +104,7 @@ pub fn headtail(opts: &Opts) -> Result<(), HeadTailError> {
                                 }
                             }
                             EventKind::Create(_) => {
-                                trace!(target: "following file", "detected file (re)creation");
+                                trace!(target: "following file", "detected possible file (re)creation");
                                 // The file has been recreated, so we need to re-open the input stream,
                                 // read *everything* that is in the new file, and resume tailing.
                                 let result = opts2.input_stream();
@@ -111,8 +112,13 @@ pub fn headtail(opts: &Opts) -> Result<(), HeadTailError> {
                                     trace!(target: "following file", "succeeded reopening file");
                                     reader = result.unwrap();
                                 } else {
+                                    let err = result.err().unwrap();
+                                    if let ErrorKind::NotFound = err.kind() {
+                                        trace!(target: "following file", "cannot find file...aborting reopen");
+                                        return;
+                                    }
                                     // Can ignore channel send error for the same reason as above...
-                                    let _ = tx.send(Err(result.err().unwrap().into()));
+                                    let _ = tx.send(Err(err.into()));
                                 }
                                 loop {
                                     let mut line = String::new();
@@ -122,7 +128,7 @@ pub fn headtail(opts: &Opts) -> Result<(), HeadTailError> {
                                             break;
                                         }
                                         Ok(_) => {
-                                            trace!(target: "following file", "catchup read line");
+                                            trace!(target: "following file", "catchup read line: {}", line.trim_end());
                                             // If the main thread has closed the channel, it will soon cause us to
                                             // exit cleanly, so we can ignore the error.
                                             let _ = tx.send(Ok(line));

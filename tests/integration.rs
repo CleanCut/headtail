@@ -170,48 +170,55 @@ fn overlapping_head_and_tail() {
 
 #[test]
 fn follow_detects_recreation() -> Result<()> {
+    let wait_duration = Duration::from_millis(100); // 4 times higher than minimum required for my machine - cleancut
+    let first_file_contents = "first file\n";
+    let second_file_contents = "second file\n";
+
     // create a temporary file
-    // Write
-    println!("1");
-    let mut tmpfile = NamedTempFile::new()?;
-    write!(tmpfile, "first file\n")?;
-    let tmpfilename = tmpfile.into_temp_path();
-    println!("2");
+    let just_for_name_file = NamedTempFile::new()?;
+    let tmpfilename = just_for_name_file.path().to_owned();
+    drop(just_for_name_file);
+    // give filesystem time to really delete the file
+    std::thread::sleep(wait_duration);
+
+    let mut tmpfile = File::create(&tmpfilename)?;
+    write!(tmpfile, "{}", first_file_contents)?;
+    tmpfile.flush();
+    drop(tmpfile);
+
+    // give filesystem time to write file contents and close file
+    std::thread::sleep(wait_duration);
 
     let mut cmd = Command::new(env!("CARGO_BIN_EXE_headtail"))
         .arg(&tmpfilename)
         .arg("--follow")
         .stdout(Stdio::piped())
         .spawn()?;
-    println!("3");
 
+    // Give headtail sufficient time to open the file and read it
+    std::thread::sleep(wait_duration);
+
+    // give filesystem time to really delete the file
     std::fs::remove_file(&tmpfilename)?;
-    println!("4");
 
-    let mut newfile = OpenOptions::new()
-        .create(true)
-        .read(true)
-        .write(true)
-        .open(tmpfilename)?;
-    println!("5");
+    std::thread::sleep(wait_duration);
 
-    write!(newfile, "second file\n")?;
-    println!("6");
-
-    let _ = newfile.flush();
+    let mut newfile = File::create(&tmpfilename)?;
+    write!(newfile, "{}", second_file_contents)?;
+    newfile.flush();
     drop(newfile);
-    println!("7");
 
-    std::thread::sleep(Duration::from_millis(100));
+    // give filesystem time to write file contents and close file
+    std::thread::sleep(wait_duration);
+
     cmd.kill()?;
-    println!("8");
 
     match cmd.wait_with_output() {
         Ok(output) => {
-            let stdout = String::from_utf8_lossy(&output.stdout);
-            println!("AAAAAAAAA {} BBBBBBBB {}", stdout, output.status.success());
-            assert!(stdout.contains("first file"));
-            assert!(stdout.contains("second file"));
+            let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+            let mut combined = first_file_contents.to_owned();
+            combined.push_str(second_file_contents);
+            assert_eq!(combined, stdout);
         }
         Err(e) => println!("Error: {}", e),
     }
