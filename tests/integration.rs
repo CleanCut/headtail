@@ -1,4 +1,4 @@
-use std::fs::{File, OpenOptions};
+use std::fs::File;
 use std::io::{BufRead, BufReader, Result, Write};
 use std::process::{Command, Stdio};
 use std::time::Duration;
@@ -183,7 +183,7 @@ fn follow_detects_recreation() -> Result<()> {
 
     let mut tmpfile = File::create(&tmpfilename)?;
     write!(tmpfile, "{}", first_file_contents)?;
-    tmpfile.flush();
+    let _ = tmpfile.flush();
     drop(tmpfile);
 
     // give filesystem time to write file contents and close file
@@ -193,6 +193,7 @@ fn follow_detects_recreation() -> Result<()> {
         .arg(&tmpfilename)
         .arg("--follow")
         .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
         .spawn()?;
 
     // Give headtail sufficient time to open the file and read it
@@ -205,7 +206,7 @@ fn follow_detects_recreation() -> Result<()> {
 
     let mut newfile = File::create(&tmpfilename)?;
     write!(newfile, "{}", second_file_contents)?;
-    newfile.flush();
+    let _ = newfile.flush();
     drop(newfile);
 
     // give filesystem time to write file contents and close file
@@ -215,6 +216,10 @@ fn follow_detects_recreation() -> Result<()> {
 
     match cmd.wait_with_output() {
         Ok(output) => {
+            println!(
+                "stderr was: `{}`",
+                String::from_utf8_lossy(&output.stderr).to_string()
+            );
             let stdout = String::from_utf8_lossy(&output.stdout).to_string();
             let mut combined = first_file_contents.to_owned();
             combined.push_str(second_file_contents);

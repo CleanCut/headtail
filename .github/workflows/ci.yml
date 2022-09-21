@@ -40,4 +40,4 @@ jobs:
           cargo fmt --all -- --check
 
       - name: Run tests
-        run: RUST_LOG=trace cargo test
+        run: RUST_LOG=trace cargo test -- --show-output
