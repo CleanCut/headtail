@@ -108,17 +108,19 @@ pub fn headtail(opts: &Opts) -> Result<(), HeadTailError> {
                                 // The file has been recreated, so we need to re-open the input stream,
                                 // read *everything* that is in the new file, and resume tailing.
                                 let result = opts2.input_stream();
-                                if result.is_ok() {
-                                    trace!(target: "following file", "succeeded reopening file");
-                                    reader = result.unwrap();
-                                } else {
-                                    let err = result.err().unwrap();
-                                    if let ErrorKind::NotFound = err.kind() {
-                                        trace!(target: "following file", "cannot find file...aborting reopen");
-                                        return;
+                                match result {
+                                    Ok(new_reader) => {
+                                        trace!(target: "following file", "succeeded reopening file");
+                                        reader = new_reader;
                                     }
-                                    // Can ignore channel send error for the same reason as above...
-                                    let _ = tx.send(Err(err.into()));
+                                    Err(e) => {
+                                        if let ErrorKind::NotFound = e.kind() {
+                                            trace!(target: "following file", "cannot find file...aborting reopen");
+                                            return;
+                                        }
+                                        // Can ignore channel send error for the same reason as above...
+                                        let _ = tx.send(Err(e.into()));
+                                    }
                                 }
                                 loop {
                                     let mut line = String::new();
