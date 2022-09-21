@@ -10,7 +10,7 @@ use std::{
 
 use errors::HeadTailError;
 use log::trace;
-use notify::{event::EventKind, Event, Watcher};
+use notify::{event::EventKind, Watcher};
 
 use opts::Opts;
 
