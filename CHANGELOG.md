@@ -1,6 +1,10 @@
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Improved
+
+- Internal improvements to how we use clap
+
 ## [0.3.1] - 2022-09-21
 
 ### Added
