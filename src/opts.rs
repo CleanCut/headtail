@@ -10,24 +10,24 @@ pub struct Opts {
     /// Read from a file instead of stdin
     pub filename: Option<String>,
     /// Number of first lines of a file to display
-    #[clap(short = 'H', long = "head", default_value_t = 10)]
+    #[clap(short = 'H', long, default_value_t = 10)]
     pub head: usize,
     /// Number of last lines of a file to display
-    #[clap(short = 'T', long = "tail", default_value_t = 10)]
+    #[clap(short = 'T', long, default_value_t = 10)]
     pub tail: usize,
     /// Wait for additional data to be appended to a file. Ignored if standard
     /// input is a pipe. If a `notify`-compatible filesystem watcher is
     /// available, that will be used. If not, we will fall back to a polling
     /// watcher.
-    #[clap(short = 'f', long = "follow")]
+    #[clap(short, long)]
     pub follow: bool,
     /// When following a file, sleep this amount in seconds between polling for changes. Ignored if
     /// a `notify`-compatible watcher is available.
-    #[clap(short = 's', long = "sleep-interval", default_value_t = 0.025)]
+    #[clap(short, long, default_value_t = 0.025)]
     pub sleep_interval: f64,
 
     /// Write output to file
-    #[clap(short = 'o', long = "outfile")]
+    #[clap(short, long)]
     pub outfile: Option<String>,
 }
 
