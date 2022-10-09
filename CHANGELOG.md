@@ -1,6 +1,10 @@
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Improved
+
+- We now run CI on Windows. `headtail` _appears_ to work on Windows. If you run into problems, please report them!
+
 ## [0.3.2] - 2022-09-22
 
 ### Improved
