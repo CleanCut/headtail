@@ -19,7 +19,7 @@ fn help() {
         Ok(output) => {
             // debug_output(&output);
             let stdout = String::from_utf8_lossy(&output.stdout);
-            assert!(stdout.contains("USAGE"));
+            assert!(stdout.contains("Usage:"));
             assert!(stdout.contains("headtail"));
             assert!(stdout.contains("FILENAME"));
             assert!(stdout.contains("-H"));

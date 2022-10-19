@@ -4,6 +4,7 @@
 ### Improved
 
 - We now run CI on Windows. `headtail` _appears_ to work on Windows. If you run into problems, please report them!
+- Updated from clap 3.2 to clap 4.0 internally (no user-facing change)
 
 ## [0.3.2] - 2022-09-22
 
