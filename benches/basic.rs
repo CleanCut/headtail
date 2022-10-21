@@ -1,4 +1,4 @@
-use criterion::{black_box, criterion_group, Criterion};
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use headtail::{headtail, opts::Opts};
 
 pub fn c1(c: &mut Criterion) {
@@ -39,3 +39,9 @@ pub fn c3(c: &mut Criterion) {
     c.bench_function("tail only", |b| b.iter(|| headtail(black_box(&o))));
 }
 criterion_group!(tail_only, c3);
+
+criterion_main! {
+    no_args,
+    head_only,
+    tail_only,
+}
