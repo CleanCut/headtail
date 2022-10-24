@@ -21,4 +21,9 @@ notify = "5.0.0"
 thiserror = "1.0.35"
 
 [dev-dependencies]
+criterion = "0.4.0"
 tempfile = "3.3.0"
+
+[[bench]]
+name = "basic"
+harness = false
