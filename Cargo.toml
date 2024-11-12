@@ -18,7 +18,7 @@ crossbeam-channel = "0.5.6"
 env_logger = "0.11.1"
 log = "0.4.17"
 notify = "7.0.0"
-thiserror = "1.0.35"
+thiserror = "2.0.3"
 
 [dev-dependencies]
 criterion = "0.5.1"
