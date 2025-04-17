@@ -32,10 +32,14 @@ pub fn headtail(opts: &Opts) -> Result<(), HeadTailError> {
     // Do our head/tail thing
     let mut tail_buffer: VecDeque<String> = VecDeque::with_capacity(opts.tail + 1);
     let mut line_num = 0;
+    let mut omitted = 0;
     loop {
         let mut line = String::new();
         match reader.read_line(&mut line)? {
             0 => {
+                if opts.separator && !tail_buffer.is_empty() && omitted > 0 {
+                    careful_write(&mut writer, &format!("[... {} line(s) omitted ...]\n", omitted))?;
+                }
                 for tail_line in &tail_buffer {
                     careful_write(&mut writer, tail_line)?;
                 }
@@ -52,6 +56,7 @@ pub fn headtail(opts: &Opts) -> Result<(), HeadTailError> {
                     tail_buffer.push_back(line);
                     if tail_buffer.len() > opts.tail {
                         tail_buffer.pop_front();
+                        omitted += 1;
                     }
                 }
             }
