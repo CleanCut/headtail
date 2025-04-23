@@ -9,6 +9,7 @@ pub fn c1(c: &mut Criterion) {
         follow: false,
         sleep_interval: 0.025,
         outfile: None,
+        separator: false,
     };
     c.bench_function("no args", |b| b.iter(|| headtail(black_box(&o))));
 }
@@ -22,6 +23,7 @@ pub fn c2(c: &mut Criterion) {
         follow: false,
         sleep_interval: 0.025,
         outfile: None,
+        separator: false,
     };
     c.bench_function("head only", |b| b.iter(|| headtail(black_box(&o))));
 }
@@ -35,6 +37,7 @@ pub fn c3(c: &mut Criterion) {
         follow: false,
         sleep_interval: 0.025,
         outfile: None,
+        separator: false,
     };
     c.bench_function("tail only", |b| b.iter(|| headtail(black_box(&o))));
 }
