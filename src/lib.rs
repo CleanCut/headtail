@@ -38,7 +38,10 @@ pub fn headtail(opts: &Opts) -> Result<(), HeadTailError> {
         match reader.read_line(&mut line)? {
             0 => {
                 if opts.separator && !tail_buffer.is_empty() && omitted > 0 {
-                    careful_write(&mut writer, &format!("[... {} line(s) omitted ...]\n", omitted))?;
+                    careful_write(
+                        &mut writer,
+                        &format!("[... {} line(s) omitted ...]\n", omitted),
+                    )?;
                 }
                 for tail_line in &tail_buffer {
                     careful_write(&mut writer, tail_line)?;

@@ -177,7 +177,10 @@ fn show_separator() {
             let stdout = String::from_utf8_lossy(&output.stdout);
             let num_lines = stdout.lines().count();
             assert_eq!(num_lines, 10 + 10 + 1);
-            assert!(stdout.contains(&format!("[... {} line(s) omitted ...]", number_of_input_lines() - 20)));
+            assert!(stdout.contains(&format!(
+                "[... {} line(s) omitted ...]",
+                number_of_input_lines() - 20
+            )));
         }
         Err(e) => println!("Error: {}", e),
     }
