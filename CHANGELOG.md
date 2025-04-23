@@ -4,7 +4,17 @@
 ### Improved
 
 - We now run CI on Windows. `headtail` _appears_ to work on Windows. If you run into problems, please report them!
-- Updated from clap 3.2 to clap 4.0 internally (no user-facing change)
+- Dependency version bumps:
+  - clap 3.2 to clap 4.0 internally (no user-facing change)
+  - env_logger 0.9.1 to 0.11.1
+  - notify 5.0.0 to 8.0.0
+  - thiserror 1.0.35 to 2.0.3
+
+### Added
+
+- We now have some benchmarks, and they are run in CI
+- We set up dependabot to automatically open pull requests to update dependencies
+- New option `-S` / `--separator` will add a message about the number of lines omitted between the head and tail output. It looks something like this: `[... 10 line(s) omitted ...]`
 
 ## [0.3.2] - 2022-09-22
 
