@@ -166,6 +166,26 @@ fn overlapping_head_and_tail() {
     }
 }
 
+#[test]
+fn show_separator() {
+    match Command::new(env!("CARGO_BIN_EXE_headtail"))
+        .arg("tests/files/input.txt")
+        .arg("-S")
+        .output()
+    {
+        Ok(output) => {
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            let num_lines = stdout.lines().count();
+            assert_eq!(num_lines, 10 + 10 + 1);
+            assert!(stdout.contains(&format!(
+                "[... {} line(s) omitted ...]",
+                number_of_input_lines() - 20
+            )));
+        }
+        Err(e) => println!("Error: {}", e),
+    }
+}
+
 // TODO: Add test for -f/--follow
 
 #[test]

@@ -29,6 +29,10 @@ pub struct Opts {
     /// Write output to file
     #[arg(short, long)]
     pub outfile: Option<String>,
+
+    /// Show separator between head and tail
+    #[arg(short = 'S', long, default_value_t = false)]
+    pub separator: bool,
 }
 
 impl Opts {
